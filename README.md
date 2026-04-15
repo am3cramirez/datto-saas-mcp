@@ -1,15 +1,19 @@
 # datto-saas-mcp
 
-An MCP (Model Context Protocol) server for the [Datto SaaS Protection API](https://saasprotection.datto.com/help/M365/Content/Other_Administrative_Tasks/using-rest-api-saas-protection.htm), focused on reporting.
+An MCP (Model Context Protocol) server for the [Datto SaaS Protection API](https://saasprotection.datto.com/help/M365/Content/Other_Administrative_Tasks/using-rest-api-saas-protection.htm), focused on reporting and management.
+
+Created by **Juan Carlos Ramirez**.
 
 ## Tools
 
 | Tool | Description |
 |------|-------------|
-| `list_domains` | List all SaaS-protected customer domains (returns `saasCustomerId` + `externalSubscriptionId`) |
-| `list_seats` | List all licensed seats for a customer (users, mailboxes, sites, teams) |
-| `get_applications` | Backup health report for a single customer — the primary reporting endpoint |
+| `list_domains` | List all SaaS-protected customer domains — returns `saasCustomerId`, `externalSubscriptionId`, seats used, and backup health percentage per domain |
+| `list_seats` | List all licensed seats for a customer (users, shared mailboxes, sites, team sites, teams, shared drives) with seat state and billing status |
+| `get_applications` | Backup health report for a single customer — per-app-type history (Exchange, OneDrive, SharePoint, Teams) with Perfect / Good / Fair / Poor status |
 | `get_all_applications_report` | Full-fleet backup health report across all customers in one call |
+| `get_activity_log` | Filtered activity log — search by client name, user, or target; supports lookbacks up to 30 days with automatic pagination |
+| `bulk_seat_change` | Add or remove seats in bulk for a customer subscription |
 
 ## Prerequisites
 
@@ -31,16 +35,22 @@ npm install
 npm run build
 ```
 
-### 3. Configure credentials
+## Usage with Claude Code (CLI)
 
-The server reads credentials from environment variables:
+Install directly with a single command — credentials are stored in the MCP config so no shell environment setup is needed:
 
 ```bash
-export DATTO_PUBLIC_KEY=your_public_key
-export DATTO_SECRET_KEY=your_secret_key
+claude mcp add datto-saas \
+  -e DATTO_PUBLIC_KEY=your_public_key \
+  -e DATTO_SECRET_KEY=your_secret_key \
+  -- node /path/to/datto-saas-mcp/dist/index.js
 ```
 
-Or copy `.env.example` to `.env` and fill in your keys (use a tool like `dotenv` or your shell's env loading).
+To verify it was added:
+
+```bash
+claude mcp list
+```
 
 ## Usage with Claude Desktop
 
@@ -60,14 +70,6 @@ Add to your `claude_desktop_config.json`:
   }
 }
 ```
-
-## Usage with Claude Code (CLI)
-
-```bash
-claude mcp add datto-saas -- node /path/to/datto-saas-mcp/dist/index.js
-```
-
-Then set the env vars in your shell before starting Claude Code, or add them to the MCP config.
 
 ## Development
 
